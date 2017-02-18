@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<properties>
 		<packaging.type>bundle</packaging.type>
+		<tests.excludeGroups>tigase.tests.SlowTest</tests.excludeGroups>
 	</properties>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>tigase</groupId>
@@ -9,14 +11,13 @@
 	<name>Tigase XMPP Server</name>
 	<packaging>${packaging.type}</packaging>
 	<description>Tigase XMPP Server - OSGi bundle</description>
-
 	<parent>
 		<groupId>tigase</groupId>
 		<artifactId>tigase-server-master</artifactId>
-		<version>7.2.0-SNAPSHOT</version>
+			<!-- <version>7.0.1</version> -->
+		<version>7.1.0-SNAPSHOT</version>
 		<relativePath>modules/master</relativePath>
 	</parent>
-
 	<profiles>
 		<profile>
 			<id>osgi</id>
@@ -43,15 +44,6 @@
 				<tests.excludeGroups></tests.excludeGroups>
 			</properties>
 		</profile>
-		<profile>
-			<id>jdk8.profile</id>
-			<properties>
-				<additionalparam>-Xdoclint:none</additionalparam>
-			</properties>
-			<activation>
-				<jdk>1.8</jdk>
-			</activation>
-		</profile>
 	</profiles>
 
 	<licenses>
@@ -61,6 +53,36 @@
 		</license>
 	</licenses>
 	<build>
+			<pluginManagement>
+		   <plugins>
+		    <!--This plugin's configuration is used to store Eclipse m2e settings 
+		     only. It has no influence on the Maven build itself. -->
+		    <plugin>
+		     <groupId>org.eclipse.m2e </groupId>
+		     <artifactId>lifecycle-mapping</artifactId>
+		     <version>1.0.0</version>
+		     <configuration>
+		      <lifecycleMappingMetadata>
+		       <pluginExecutions>
+		        <pluginExecution>
+		         <pluginExecutionFilter>
+		          <groupId>org.codehaus.gmaven</groupId>
+		          <artifactId>gmaven-plugin</artifactId>
+		          <versionRange>[1.5,)</versionRange>
+		          <goals>
+		           <goal>execute</goal>
+		          </goals>
+		         </pluginExecutionFilter>
+		         <action>
+		          <ignore></ignore>
+		         </action>
+		        </pluginExecution>
+		       </pluginExecutions>
+		      </lifecycleMappingMetadata>
+		     </configuration>
+		    </plugin>
+		   </plugins>
+		  </pluginManagement>
 		<finalName>${project.artifactId}</finalName>
 		<plugins>
 			<plugin>
@@ -72,8 +94,10 @@
 					<instructions combine.inherited="append">
 						<manifestLocation>src/main/resources/META-INF/MANIFEST.MF</manifestLocation>
 						<Implementation-Title>${project.name}</Implementation-Title>
-						<Implementation-Version>${project.version}-b${gitVersion}/${buildNumber} (${maven.build.timestamp})</Implementation-Version>
-						<Implementation-Build>${gitVersion}/${buildNumber} (${maven.build.timestamp})</Implementation-Build>
+						<Implementation-Version>${project.version}-b${gitVersion}/${buildNumber}
+							(${maven.build.timestamp})</Implementation-Version>
+						<Implementation-Build>${gitVersion}/${buildNumber}
+							(${maven.build.timestamp})</Implementation-Build>
 						<Tigase-Version>${project.version}-b${gitVersion}</Tigase-Version>
 						<Bundle-Activator>tigase.osgi.Activator</Bundle-Activator>
 						<Export-Package>gnu.inet.encoding.*;version=${packet.version},tigase.*;version=${packet.version};-split-package:=merge-first</Export-Package>
@@ -89,18 +113,6 @@
 					</instructions>
 				</configuration>
 			</plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -113,21 +125,14 @@
 							<goal>jar</goal>
 						</goals>
 						<configuration>
-							<source>1.8</source>
+							<source>1.7</source>
 							<quiet>true</quiet>
 							<aggregate>true</aggregate>
-							<includeDependencySources>true</includeDependencySources>
-							<dependencySourceIncludes>
-								<dependencySourceInclude>tigase:*</dependencySourceInclude>
-							</dependencySourceIncludes>
-
 							<reportOutputDirectory>${project.reporting.outputDirectory}/docs/javadoc</reportOutputDirectory>
 							<destDir>docs/javadoc</destDir>
 
 							<finalName>${project.artifactId}-${project.version}-b${gitVersion}</finalName>
 							<jarOutputDirectory>pack</jarOutputDirectory>
-
-							<additionalparam>-Xdoclint:none</additionalparam>
 						</configuration>
 					</execution>
 				</executions>
@@ -135,81 +140,44 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.19.1</version>
+				<version>2.17</version>
 				<dependencies>
 					<dependency>
 						<groupId>org.apache.maven.surefire</groupId>
 						<artifactId>surefire-junit47</artifactId>
-						<version>2.19.1</version>
+						<version>2.17</version>
 					</dependency>
 				</dependencies>
 				<configuration>
 					<excludedGroups>${tests.excludeGroups}</excludedGroups>
 					<parallel>methods</parallel>
 					<threadCount>10</threadCount>
-                    <systemProperties>
-                        <property>
-                            <name>java.util.logging.config.file</name>
-                            <value>src/test/resources/logging.properties</value>
-                        </property>
-                    </systemProperties>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jarsigner-plugin</artifactId>
-				<version>1.4</version>
-				<executions>
-					<execution>
-						<id>sign</id>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<archiveDirectory>${project.basedir}</archiveDirectory>
-					<includes>
-						<include>target/tigase*.?ar</include>
-						<include>jars/tigase*.?ar</include>
-					</includes>
-					<processMainArtifact>false</processMainArtifact>
-					<processAttachedArtifacts>false</processAttachedArtifacts>
-					<tsa>${tsa-uri}</tsa>
-					<skip>${sign-skip}</skip>
-
-					<keystore>${sign-keystore}</keystore>
-					<alias>${sign-alias}</alias>
-					<storepass>${sign-storepass}</storepass>
-					<keypass>${sign-keypass}</keypass>
-					<verbose>${verbose-log}</verbose>
-				</configuration>
-			</plugin>
+				<!-- 20161011添加 -->
+				<plugin> 
+		            <groupId>org.apache.maven.plugins</groupId> 
+		            <artifactId>maven-compiler-plugin</artifactId>
+		            <version>3.1</version> 
+		            <configuration> 
+		                <!-- <source>1.8</source> 
+		                <target>1.8</target>  -->
+		                <encoding>UTF8</encoding> 
+		            </configuration> 
+	         	</plugin>
 		</plugins>
 	</build>
 	<dependencies>
 		<dependency>
 			<groupId>tigase</groupId>
 			<artifactId>tigase-utils</artifactId>
-			<version>3.6.0-SNAPSHOT</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>tigase</groupId>
-			<artifactId>tigase-xmltools</artifactId>
-			<version>3.6.0-SNAPSHOT</version>
+			<version>3.4.4</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<version>1.4.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-			<version>5.0.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -226,10 +194,14 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.codehaus.groovy</groupId>
-			<artifactId>groovy-all</artifactId>
-			<version>2.4.5</version>
-			<scope>provided</scope>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongo-java-driver</artifactId>
+			<version>2.13.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>1.1.41</version>
 		</dependency>
 	</dependencies>
 </project>
